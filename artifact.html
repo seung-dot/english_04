@@ -1,0 +1,387 @@
+<title>생활영어 놀이터</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* 레이아웃: 단원 카드 홈 → 활동 선택 → 큰 버튼 중심 학습 화면. 밝은 단일 테마(교실 화면용) */
+:root{--c:#4f7cff;--bg:#f4f7ff;--ink:#1f2a44;--card:#fff;--ok:#2fb36d;--bad:#e5484d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",sans-serif;font-size:18px}
+button{font:inherit;cursor:pointer;border:0;border-radius:16px;padding:12px 18px;background:var(--c);color:#fff;font-weight:700;min-height:52px;transition:transform .1s}
+button:active{transform:scale(.96)}
+button.ghost{background:#fff;color:var(--c);border:2px solid var(--c)}
+header{display:flex;align-items:center;gap:12px;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));background:var(--c);color:#fff;position:sticky;top:env(safe-area-inset-top,0px);z-index:11}
+header h1{font-size:20px;margin:0;flex:1}
+header .back{background:rgba(255,255,255,.25);min-height:44px;padding:8px 14px}
+main{max-width:860px;margin:0 auto;padding:16px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px))}
+.hero{text-align:center;padding:24px 16px 8px}
+.hero h1{font-size:30px;margin:0 0 6px}
+.hero p{margin:0;color:#5a6788}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-top:16px}
+.ucard{background:var(--card);border-radius:20px;padding:18px 14px;text-align:left;color:var(--ink);border-top:8px solid var(--c);box-shadow:0 2px 8px #0001;min-height:150px}
+.ucard .n{font-size:14px;color:var(--c);font-weight:800}
+.ucard .t{font-size:20px;font-weight:800;margin:4px 0}
+.ucard .e{font-size:34px}
+.ucard .p{font-size:13px;color:#667;margin-top:6px}
+.modes{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.mbtn{background:#fff;color:var(--ink);text-align:left;border:3px solid #e3e8f7;display:flex;gap:12px;align-items:center;padding:14px;min-height:78px}
+.mbtn .i{font-size:34px}
+.mbtn b{display:block}
+.mbtn small{color:#667;font-weight:500}
+.mbtn.done{border-color:var(--ok)}
+.mbtn.done::after{content:"✔";margin-left:auto;color:var(--ok);font-size:24px}
+.big{font-size:90px;text-align:center;line-height:1.1}
+.panel{background:#fff;border-radius:24px;padding:22px;box-shadow:0 2px 10px #0001;text-align:center}
+.word{font-size:46px;font-weight:900;color:var(--c)}
+.ko{font-size:26px;font-weight:700;margin-top:6px}
+.pron{font-size:20px;color:#667;margin-top:4px}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.opts{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.opt{background:#fff;color:var(--ink);border:3px solid #dfe5f7;font-size:24px;min-height:72px}
+.opt.right{background:var(--ok);color:#fff;border-color:var(--ok)}
+.opt.wrong{background:var(--bad);color:#fff;border-color:var(--bad);animation:shake .3s}
+.prog{height:10px;background:#dde4f8;border-radius:9px;overflow:hidden;margin-bottom:14px}
+.prog i{display:block;height:100%;background:var(--c);transition:width .3s}
+.cardflip{cursor:pointer;min-height:300px;display:flex;flex-direction:column;justify-content:center;align-items:center}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mc{background:#fff;color:var(--ink);border:3px solid #dfe5f7;min-height:68px;font-size:20px}
+.mc.sel{border-color:var(--c);background:#e8eeff}
+.mc.hit{visibility:hidden}
+.slots{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+.slot{width:48px;height:58px;border-bottom:5px solid var(--c);font-size:34px;font-weight:900;color:var(--c);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.slot.gap{border:0;width:22px}
+.tiles{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.tile{background:#fff;color:var(--ink);border:3px solid var(--c);width:56px;height:62px;font-size:30px;padding:0;border-radius:14px}
+.tile.used{visibility:hidden}
+.sent{font-size:30px;font-weight:800;line-height:1.7;margin:10px 0}
+.blank{display:inline-block;min-width:120px;border-bottom:4px solid var(--c);color:var(--ok);text-align:center}
+.hint{font-size:20px;color:#5a6788;margin-bottom:6px}
+.bub{max-width:82%;padding:12px 16px;border-radius:20px;margin:10px 0;text-align:left;background:#fff;border:3px solid #dfe5f7;cursor:pointer}
+.bub.me{margin-left:auto;background:#e8eeff;border-color:var(--c)}
+.bub.now{outline:4px solid #ffb703}
+.bub .en{font-size:24px;font-weight:800}
+.bub .kk{font-size:16px;color:#667}
+.bub .who{font-size:13px;color:var(--c);font-weight:800}
+.bingo{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.bc{background:#fff;color:var(--ink);border:3px solid #dfe5f7;min-height:104px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:18px;padding:6px}
+.bc .e{font-size:36px}
+.bc.on{background:#ffd166;border-color:#f4a300}
+.bc.line{background:#ff8fab;border-color:#e5486d}
+.bc.shake{animation:shake .3s}
+.banner{font-size:34px;font-weight:900;color:#e5486d;text-align:center;margin:8px 0;animation:pop .5s}
+.stars{font-size:54px;letter-spacing:6px}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+@media(max-width:480px){.word{font-size:38px}.big{font-size:72px}.opt{font-size:20px}.sent{font-size:24px}.slot{width:38px}}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--c)}
+</style>
+<div id="app"></div>
+<script>
+/* ===== 데이터 (2022 교육과정 생활영어 워크북 1~8단원) ===== */
+// words: [영어, 한글, 발음, 이모지] / fills: t 문장(___ 빈칸), h 힌트, a 정답, o 보기 / dlgs: 상황극
+const UNITS=[
+{id:1,title:'우리 동네 장소들',icon:'🚶',color:'#4f7cff',goal:'거리에서 볼 수 있는 장소 간판 단어',
+ words:[['mart','마트','마/트','🛒'],['cafe','카페','카/페','☕'],['hotel','호텔','호/텔','🛏️'],['building','건물','빌/딩','🏢'],['restaurant','식당','레스/토/랑','🍽️'],['bus stop','버스 정류장','버/스 스/탑','🚏'],['school','학교','스/쿨','🏫'],['home','집','홈','🏠'],['toilet','화장실','토일/렛','🚽'],['airport','공항','에어/포트','✈️']],
+ fills:[
+ {h:'배가 고파요. 밥을 먹고 싶어요.',t:'👉 ___',a:'restaurant',o:['restaurant','airport']},
+ {h:'집에 가야 해요. 버스를 타고 싶어요.',t:'👉 ___',a:'bus stop',o:['cafe','bus stop']},
+ {h:'멀리 여행을 가요. 비행기를 타요.',t:'👉 ___',a:'airport',o:['airport','mart']},
+ {h:'선생님, 친구들과 함께 공부를 해요.',t:'👉 ___',a:'school',o:['school','hotel']},
+ {h:'하루가 끝났어요. 편안하게 잠을 자요.',t:'👉 ___',a:'home',o:['home','building']},
+ {h:'손을 씻고 싶어요. 화장실에 가고 싶어요.',t:'👉 ___',a:'toilet',o:['toilet','mart']},
+ {t:'나는 매일 공부하러 ___ 에 갑니다.',a:'school',o:['school','airport','mart','cafe','toilet']},
+ {t:'비행기를 타려면 ___ 에 갑니다.',a:'airport',o:['school','airport','mart','cafe','toilet']},
+ {t:'맛있는 과자와 과일을 사러 ___ 에 갑니다.',a:'mart',o:['school','airport','mart','cafe','toilet']},
+ {t:'어른들이 따뜻한 커피를 마시러 ___ 에 갑니다.',a:'cafe',o:['school','airport','mart','cafe','toilet']},
+ {t:'손을 깨끗하게 씻으러 ___ 에 갑니다.',a:'toilet',o:['school','airport','mart','cafe','toilet']}],
+ dlgs:[]},
+{id:2,title:'교통·생활시설',icon:'🚌',color:'#f08a24',goal:'교통수단과 안전 시설 간판 단어',
+ words:[['bus','버스','버/스','🚌'],['taxi','택시','택/시','🚕'],['school bus','학교 버스','스/쿨 버/스','🚍'],['bus stop','버스 정류장','버/스 스/탑','🚏'],['parking','주차장 (P)','파/킹','🅿️'],['school zone','어린이 보호 구역','스/쿨 존','🚸'],['ATM','현금 입출금기','에이/티/엠','🏧'],['CCTV','안전 카메라','씨/씨/티/브이','📹'],['exit','출구','엑/시트','🚪'],['gas station','주유소','가스 스/테이/션','⛽']],
+ fills:[
+ {t:'많은 사람들이 함께 타는 파란색 ___ 을 탑니다.',a:'bus',o:['bus','taxi','school bus','bus stop','parking']},
+ {t:'급할 때 손을 흔들어 타는 자동차는 ___ 입니다.',a:'taxi',o:['bus','taxi','school bus','bus stop','parking']},
+ {t:'아침에 우리를 학교까지 데려다주는 노란색 ___ 을 탑니다.',a:'school bus',o:['bus','taxi','school bus','bus stop','parking']},
+ {t:'버스를 타기 위해 줄을 서서 기다리는 곳은 ___ 입니다.',a:'bus stop',o:['bus','taxi','school bus','bus stop','parking']},
+ {t:'자동차를 안전하게 세워두는 곳에는 ___ 표지판이 있습니다.',a:'parking',o:['bus','taxi','school bus','bus stop','parking']},
+ {t:'학교 앞 도로에서 천천히 달려야 하는 곳은 ___ 입니다.',a:'school zone',o:['school zone','ATM','CCTV','exit','gas station']},
+ {t:'기계에 카드를 넣고 돈을 뽑을 수 있는 ___ 에 갑니다.',a:'ATM',o:['school zone','ATM','CCTV','exit','gas station']},
+ {t:'골목길에서 우리를 안전하게 지켜주려고 녹화하는 ___ 이 있습니다.',a:'CCTV',o:['school zone','ATM','CCTV','exit','gas station']},
+ {t:'건물에서 밖으로 나갈 때는 초록색 ___ 표지판을 따라갑니다.',a:'exit',o:['school zone','ATM','CCTV','exit','gas station']},
+ {t:'자동차가 쌩쌩 달리려면 ___ 에서 기름을 넣습니다.',a:'gas station',o:['school zone','ATM','CCTV','exit','gas station']}],
+ dlgs:[]},
+{id:3,title:'음식점과 상점',icon:'🍽️',color:'#e0568a',goal:'식당·상점에서 자주 보는 실용 단어',
+ words:[['open','영업 중 (열림)','오/픈','🟢'],['close','영업 종료 (닫힘)','클/로/즈','🔴'],['push','미세요','푸/시','➡️'],['pull','당기세요','풀','⬅️'],['menu','메뉴 (차림표)','메/뉴','📋'],['order','주문','오/더','🗣️'],['self-service','셀프서비스','셀/프/서/비/스','🙋'],['water','물','워/터','💧'],['card','카드','카/드','💳'],['cash','현금','캐/시','💵']],
+ fills:[
+ {t:'식당 문에 ___ (이)라고 쓰여 있으면 들어가도 됩니다.',a:'open',o:['open','close','push','pull','menu']},
+ {t:'식당 문에 ___ (이)라고 쓰여 있으면 오늘 닫은 것입니다.',a:'close',o:['open','close','push','pull','menu']},
+ {t:'문을 ___ (이)라고 적힌 쪽으로 힘껏 밀어주세요.',a:'push',o:['open','close','push','pull','menu']},
+ {t:'문을 열 때 내 쪽으로 당기려면 ___ 을 잡습니다.',a:'pull',o:['open','close','push','pull','menu']},
+ {t:'자리에 앉으면 가장 먼저 ___ 을 보고 음식을 고릅니다.',a:'menu',o:['open','close','push','pull','menu']},
+ {t:'음식을 고른 다음, ___ 하는 곳으로 가서 말합니다.',a:'order',o:['order','self-service','water','card','cash']},
+ {t:'반찬이나 물을 직접 가져오는 것을 ___ (이)라고 합니다.',a:'self-service',o:['order','self-service','water','card','cash']},
+ {t:'목이 마를 때는 컵에 시원한 ___ 을 따릅니다.',a:'water',o:['order','self-service','water','card','cash']},
+ {t:'물건을 살 때 돈 대신 딱딱한 플라스틱 ___ (으)로 계산합니다.',a:'card',o:['order','self-service','water','card','cash']},
+ {t:'지폐나 동전 같은 돈을 ___ (이)라고 부릅니다.',a:'cash',o:['order','self-service','water','card','cash']}],
+ dlgs:[]},
+{id:4,title:'기분을 말해요',icon:'😊',color:'#8a5cf6',goal:'기분과 감정을 영어로 말하기',
+ words:[['happy','행복한, 기분 좋은','해/피','😊'],['sad','슬픈','새/드','😢'],['angry','화난','앵/그/리','😡'],['tired','피곤한','타/이/어/드','😫'],['hungry','배고픈','헝/그/리','🤤'],['sick','아픈','식','🤒'],['Sorry','미안해','쏘/리','🙏'],['OK','괜찮아','오/케/이','👌']],
+ fills:[
+ {h:'친구들과 쉬는 시간에 재미있게 놀았어요.',t:'I am ___.',a:'happy',o:['happy','angry']},
+ {h:'제일 아끼는 장난감이 떨어져 망가졌어요.',t:'I am ___.',a:'sad',o:['happy','sad']},
+ {h:'동생이 내 아이스크림을 다 먹어버렸어요.',t:'I am ___.',a:'angry',o:['angry','tired']},
+ {h:'체육 시간에 운동장을 5바퀴나 뛰었더니 힘이 없어요.',t:'I am ___.',a:'tired',o:['tired','hungry']},
+ {h:'늦잠을 자서 아침밥을 못 먹었어요. 꼬르륵~',t:'I am ___.',a:'hungry',o:['sick','hungry']},
+ {h:'머리가 펄펄 끓고 열이 나요. 병원에 가야 해요.',t:'I am ___.',a:'sick',o:['sick','happy']},
+ {h:'친구가 아파 보여요. (너 괜찮니?)',t:'"Are you ___?"',a:'OK',o:['OK','Sorry','sick']},
+ {h:'열이 나고 아파요. (아니, 나 아파.)',t:'"No, I am ___."',a:'sick',o:['OK','Sorry','sick']},
+ {h:'친구와 부딪혔을 때 (미안해.)',t:'"___."',a:'Sorry',o:['OK','Sorry','sick']},
+ {h:'사과를 받았을 때 (괜찮아.)',t:'"It\'s ___."',a:'OK',o:['OK','Sorry','sick']}],
+ dlgs:[
+ {title:'오늘 기분이 어때요?',roles:['선생님','나'],lines:[[0,'How are you today?','오늘 기분이 어때요?'],[1,'I am happy.','나는 기분이 좋아요.']]},
+ {title:'앗, 실수했어요!',roles:['실수한 사람','사과받은 사람'],lines:[[0,'Oh, Sorry!','앗, 미안해!'],[1,"It's OK.",'괜찮아.'],[0,'Are you OK?','너 괜찮니?'],[1,'Yes, I am OK.','응, 괜찮아.']]}]},
+{id:5,title:'식당에서 주문해요',icon:'🍕',color:'#e5484d',goal:'음식 단어를 익히고 영어로 주문하기',
+ words:[['pizza','피자','피/자','🍕'],['chicken','치킨, 닭고기','치/킨','🍗'],['rice','밥, 쌀','라/이/스','🍚'],['noodle','국수, 면','누/들','🍜'],['water','물','워/터','💧'],['juice','주스','주/스','🧃'],['milk','우유','우/유','🥛'],['ice cream','아이스크림','아/이/스/크/림','🍦']],
+ fills:[
+ {h:'나는 피자를 좋아해요.',t:'I like ___.',a:'pizza',o:['pizza','chicken','ice cream','milk']},
+ {h:'나는 치킨을 좋아해요.',t:'I like ___.',a:'chicken',o:['pizza','chicken','ice cream','milk']},
+ {h:'나는 아이스크림을 좋아해요.',t:'I like ___.',a:'ice cream',o:['pizza','chicken','ice cream','milk']},
+ {h:'나는 우유를 좋아해요.',t:'I like ___.',a:'milk',o:['pizza','chicken','ice cream','milk']},
+ {h:'점원: 주문하시겠어요?',t:'"Are you ready to ___?"',a:'order',o:['order','please','Thank you']},
+ {h:'손님: 주스 주세요.',t:'"Can I have juice, ___?"',a:'please',o:['order','please','Thank you']},
+ {h:'손님: 감사합니다.',t:'"___."',a:'Thank you',o:['order','please','Thank you']}],
+ dlgs:[{title:'식당에서 주문하기',roles:['점원','손님'],lines:[[0,'Are you ready to order?','주문하시겠어요?'],[1,'Can I have pizza, please?','피자 주세요.'],[0,'Here you are.','여기 있습니다.'],[1,'Thank you.','감사합니다.']]}]},
+{id:6,title:'마트에서 사요',icon:'🛒',color:'#16a394',goal:'사고 싶은 물건을 영어로 요청하기',
+ words:[['snack','과자','스/낵','🍪'],['candy','사탕','캔/디','🍬'],['bread','빵','브/레/드','🍞'],['egg','달걀','에/그','🥚'],['soap','비누','솝','🧼'],['tissue','휴지','티/슈','🧻'],['pen','펜','펜','🖊️'],['notebook','공책','노/트/북','📓']],
+ fills:[
+ {h:'나는 과자를 사고 싶어요.',t:'I want ___.',a:'snack',o:['snack','candy','bread','egg']},
+ {h:'나는 사탕을 사고 싶어요.',t:'I want ___.',a:'candy',o:['snack','candy','bread','egg']},
+ {h:'나는 빵을 사고 싶어요.',t:'I want ___.',a:'bread',o:['snack','candy','bread','egg']},
+ {h:'나는 달걀을 사고 싶어요.',t:'I want ___.',a:'egg',o:['snack','candy','bread','egg']},
+ {h:'점원을 부를 때 (실례합니다.)',t:'"___ me."',a:'Excuse',o:['Excuse','Help','card','cash']},
+ {h:'도와달라고 할 때 (도와주세요.)',t:'"___ me, please."',a:'Help',o:['Excuse','Help','card','cash']},
+ {h:'카드로 계산할 때',t:'"Here is my ___."',a:'card',o:['Excuse','Help','card','cash']},
+ {h:'현금으로 계산할 때',t:'"I will pay in ___."',a:'cash',o:['Excuse','Help','card','cash']}],
+ dlgs:[{title:'마트에서 물건 찾고 계산하기',roles:['손님','점원'],lines:[[0,'Excuse me. Help me, please.','실례합니다. 좀 도와주세요.'],[1,'Yes. Here you are.','네. 여기 있습니다.'],[0,'Thank you.','감사합니다.'],[1,'Card or cash?','카드인가요, 현금인가요?'],[0,'Card, please.','카드로 할게요.']]}]},
+{id:7,title:'나의 하루',icon:'⏰',color:'#d9a400',goal:'하루 일과를 영어로 말하고 쓰기',
+ words:[['get up','일어나다','겟/업','⏰'],['wash','씻다','워/시','🧼'],['eat','먹다','잇','🍚'],['go to school','학교에 가다','고/투/스/쿨','🏫'],['study','공부하다','스/터/디','📚'],['play','놀다','플/레/이','⚽'],['go home','집에 가다','고/홈','🏠'],['sleep','잠을 자다','슬/립','😴']],
+ fills:[
+ {h:'나는 학교에 갔어요.',t:'I went to ___.',a:'school',o:['school','mart','pizza','ice cream']},
+ {h:'나는 마트에 갔어요.',t:'I went to ___.',a:'mart',o:['school','mart','pizza','ice cream']},
+ {h:'나는 피자를 먹었어요.',t:'I ate ___.',a:'pizza',o:['school','mart','pizza','ice cream']},
+ {h:'나는 아이스크림을 먹었어요.',t:'I ate ___.',a:'ice cream',o:['school','mart','pizza','ice cream']},
+ {t:'아침에 눈을 번쩍 뜨고 ___ (일어나다).',a:'get up',o:['get up','wash','study','sleep']},
+ {t:'세수를 깨끗하게 ___ (씻다).',a:'wash',o:['get up','wash','study','sleep']},
+ {t:'열심히 책을 보며 ___ (공부하다).',a:'study',o:['get up','wash','study','sleep']},
+ {t:'밤에는 이불을 덮고 쿨쿨 ___ (잠을 자다).',a:'sleep',o:['get up','wash','study','sleep']}],
+ dlgs:[{title:'오늘 나의 하루',roles:['친구','나'],lines:[[0,'Where did you go today?','오늘 어디에 갔니?'],[1,'I went to school.','나는 학교에 갔어.'],[0,'What did you eat?','무엇을 먹었니?'],[1,'I ate pizza.','나는 피자를 먹었어.'],[0,'How are you today?','오늘 기분이 어때?'],[1,'I am happy.','나는 기분이 좋아.']]}]},
+{id:8,title:'마음을 전해요',icon:'💌',color:'#e0568a',goal:'고마운 사람을 부르고 감사 카드 쓰기',
+ words:[['mom','엄마','맘','👩'],['dad','아빠','대/드','👨'],['teacher','선생님','티/처','👩‍🏫'],['friend','친구','프/렌/드','🧑‍🤝‍🧑'],['letter','편지','레/터','✉️'],['card','카드','카/드','💌'],['heart','하트, 마음','하/트','❤️'],['love','사랑(하다)','러/브','🥰']],
+ fills:[
+ {h:'사랑하는 엄마에게',t:'Dear ___,',a:'mom',o:['mom','dad','teacher','friend']},
+ {h:'사랑하는 아빠에게',t:'Dear ___,',a:'dad',o:['mom','dad','teacher','friend']},
+ {h:'사랑하는 선생님에게',t:'Dear ___,',a:'teacher',o:['mom','dad','teacher','friend']},
+ {h:'사랑하는 친구에게',t:'Dear ___,',a:'friend',o:['mom','dad','teacher','friend']},
+ {h:'사랑해요!',t:'I ___ you.',a:'love',o:['love','Thank','letter','card']},
+ {h:'감사합니다!',t:'___ you.',a:'Thank',o:['love','Thank','letter','card']},
+ {h:'여기 편지가 있어요.',t:'Here is a ___.',a:'letter',o:['love','Thank','letter','card']},
+ {h:'여기 카드가 있어요.',t:'Here is a ___.',a:'card',o:['love','Thank','letter','card']}],
+ dlgs:[{title:'카드를 건네며 마음 전하기',roles:['나','상대방'],lines:[[0,'Here is a card.','여기 카드가 있어요.'],[1,'Oh, what is it?','오, 이게 뭐니?'],[0,'Thank you. I love you!','감사해요. 사랑해요!'],[1,'Thank you so much!','정말 고마워!']]}]}
+];
+
+/* ===== 공통 도구 ===== */
+const app=document.getElementById('app'),$=s=>document.querySelector(s);
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+let playTok=0, timers=[];
+function later(fn,ms){const t=setTimeout(fn,ms);timers.push(t)}
+function pick(u){try{const v=speechSynthesis.getVoices().filter(v=>v.lang&&v.lang.startsWith('en'));return v.find(x=>/en[-_]US/.test(x.lang))||v[0]}catch(e){}}
+function speakP(t){return new Promise(res=>{try{speechSynthesis.cancel();const s=new SpeechSynthesisUtterance(t);s.lang='en-US';s.rate=.8;const v=pick();if(v)s.voice=v;s.onend=s.onerror=()=>res();speechSynthesis.speak(s);setTimeout(res,7000)}catch(e){res()}})}
+const speak=t=>{speakP(t)};
+let ac;function tone(f,d=.15,dl=0){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.value=.07;o.connect(g);g.connect(ac.destination);const t=ac.currentTime+dl;o.start(t);o.stop(t+d)}catch(e){}}
+const sOk=()=>{tone(660,.12);tone(880,.2,.12)},sNo=()=>tone(200,.28);
+const KEY='lifeEnglishProgress';
+const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return{}}};
+function mark(uid,m){try{const p=load();(p[uid]=p[uid]||{})[m]=1;localStorage.setItem(KEY,JSON.stringify(p))}catch(e){}}
+const MODES=[
+ ['cards','🃏','단어 카드','보고, 듣고, 따라 읽기'],
+ ['match','🧩','짝 맞추기','영어와 그림/뜻 연결'],
+ ['quiz','❓','퀴즈','그림·뜻·소리로 맞히기'],
+ ['spell','🔤','글자 맞추기','철자 순서대로 누르기'],
+ ['fill','📝','문장 완성','빈칸에 알맞은 말 고르기'],
+ ['dialog','🎭','상황극','역할을 정해 대화 연습'],
+ ['bingo','🎲','소리 빙고','듣고 알맞은 칸 찾기']];
+const GAMES={};
+
+function go(fn){playTok++;timers.forEach(clearTimeout);timers=[];try{speechSynthesis.cancel()}catch(e){};window.scrollTo(0,0);fn()}
+function setColor(c){document.documentElement.style.setProperty('--c',c||'#4f7cff')}
+function shell(title,body,back){app.innerHTML=`<header><button class="back" id="back">← 뒤로</button><h1>${title}</h1></header><main>${body}</main>`;$('#back').onclick=()=>go(back)}
+
+/* ===== 화면 ===== */
+function home(){
+ setColor();const p=load();
+ app.innerHTML=`<main><div class="hero"><h1>🌈 생활영어 놀이터</h1><p>단원을 골라 눌러보세요!</p></div><div class="grid">${UNITS.map(u=>{
+  const n=Object.keys(p[u.id]||{}).length;
+  return `<button class="ucard" style="--c:${u.color}" data-u="${u.id}"><div class="n">${u.id}단원</div><div class="e">${u.icon}</div><div class="t">${u.title}</div><div class="p">${u.goal}<br>⭐ ${n}/${MODES.filter(m=>m[0]!=='dialog'||u.dlgs.length).length}</div></button>`}).join('')}</div></main>`;
+ document.querySelectorAll('.ucard').forEach(b=>b.onclick=()=>go(()=>unitPage(UNITS[b.dataset.u-1])));
+}
+function unitPage(u){
+ setColor(u.color);const p=(load()[u.id])||{};
+ const ms=MODES.filter(m=>m[0]!=='dialog'||u.dlgs.length);
+ shell(`${u.id}단원 ${u.title}`,`<p style="text-align:center;color:#5a6788;margin-top:0">🎯 ${u.goal}</p><div class="modes">${ms.map(m=>`<button class="mbtn${p[m[0]]?' done':''}" data-m="${m[0]}"><span class="i">${m[1]}</span><span><b>${m[2]}</b><small>${m[3]}</small></span></button>`).join('')}</div>`,home);
+ document.querySelectorAll('.mbtn').forEach(b=>b.onclick=()=>go(()=>GAMES[b.dataset.m](u)));
+}
+const back=u=>()=>unitPage(u);
+function result(u,m,score,total,again){
+ mark(u.id,m);
+ const r=total?score/total:1,st=r>=.9?3:r>=.6?2:1;
+ shell('결과',`<div class="panel"><div class="big">🎉</div><h2>참 잘했어요!</h2><div class="stars">${'⭐'.repeat(st)}${'☆'.repeat(3-st)}</div>${total?`<p>${total}개 중 <b>${score}개</b> 맞혔어요</p>`:''}<div class="row"><button id="again">다시 하기</button><button class="ghost" id="bk">다른 활동</button></div></div>`,back(u));
+ sOk();$('#again').onclick=()=>go(again);$('#bk').onclick=()=>go(back(u));
+}
+const prog=(i,n)=>`<div class="prog"><i style="width:${i/n*100}%"></i></div>`;
+
+/* ===== 1. 단어 카드 ===== */
+GAMES.cards=function(u){
+ let i=0,show=false;const W=u.words;
+ (function draw(){
+  const [en,ko,pr,em]=W[i];
+  shell('단어 카드',`${prog(i+1,W.length)}<div class="panel cardflip" id="cf"><div class="big">${em}</div><div class="word">${en}</div>${show?`<div class="ko">${ko}</div><div class="pron">읽는 법: ${pr}</div>`:'<div class="pron">👆 카드를 누르면 뜻이 나와요</div>'}</div><div class="row"><button class="ghost" id="pv" ${i?'':'disabled'}>◀ 이전</button><button id="sp">🔊 듣기</button><button class="ghost" id="nx">${i<W.length-1?'다음 ▶':'끝 ✔'}</button></div>`,back(u));
+  speak(en);
+  $('#cf').onclick=()=>{show=!show;draw()};
+  $('#sp').onclick=()=>speak(en);
+  $('#pv').onclick=()=>{i--;show=false;draw()};
+  $('#nx').onclick=()=>{if(i<W.length-1){i++;show=false;draw()}else go(()=>result(u,'cards',0,0,()=>GAMES.cards(u)))};
+ })();
+};
+
+/* ===== 2. 짝 맞추기 ===== */
+GAMES.match=function(u){
+ const W=shuffle(u.words).slice(0,6);const L=shuffle(W),R=shuffle(W);
+ let sel=null,left=W.length,miss=0;
+ shell('짝 맞추기',`<p style="text-align:center">영어 카드와 그림·뜻 카드를 차례로 눌러 짝을 찾아요</p><div class="mgrid" id="mg"></div>`,back(u));
+ const mg=$('#mg');
+ for(let k=0;k<W.length;k++){
+  mg.insertAdjacentHTML('beforeend',`<button class="mc" data-s="L" data-w="${L[k][0]}"><b>${L[k][0]}</b></button><button class="mc" data-s="R" data-w="${R[k][0]}">${R[k][3]}<br><small>${R[k][1]}</small></button>`);
+ }
+ mg.querySelectorAll('.mc').forEach(b=>b.onclick=()=>{
+  if(b.classList.contains('hit'))return;
+  if(b.dataset.s==='L')speak(b.dataset.w);
+  if(!sel||sel.dataset.s===b.dataset.s){if(sel)sel.classList.remove('sel');sel=b;b.classList.add('sel');return}
+  if(sel.dataset.w===b.dataset.w){sOk();sel.classList.add('hit');b.classList.add('hit');sel=null;if(--left===0)later(()=>go(()=>result(u,'match',Math.max(0,W.length-miss),W.length,()=>GAMES.match(u))),500)}
+  else{sNo();miss++;sel.classList.remove('sel');sel=null}
+ });
+};
+
+/* ===== 3. 퀴즈 ===== */
+GAMES.quiz=function(u){
+ const N=8,qs=[];const pool=shuffle(u.words);
+ for(let k=0;k<N;k++){const w=pool[k%pool.length];qs.push({w,type:k%3,d:shuffle(u.words.filter(x=>x[0]!==w[0])).slice(0,3)})}
+ let i=0,score=0;
+ (function draw(){
+  const {w,type,d}=qs[i];const opts=shuffle([w,...d]);
+  let q,label;
+  if(type===0){q=`<div class="big">${w[3]}</div>`;label=x=>x[0]}
+  else if(type===1){q=`<div class="word">${w[0]}</div><button id="sp">🔊 듣기</button>`;label=x=>x[1]}
+  else{q=`<div class="big">🔊</div><div class="ko">들려주는 단어는?</div><button id="sp">다시 듣기</button>`;label=x=>x[3]}
+  shell('퀴즈',`${prog(i,N)}<div class="panel">${q}</div><div class="opts">${opts.map((o,k)=>`<button class="opt" data-k="${k}">${label(o)}</button>`).join('')}</div>`,back(u));
+  const sp=$('#sp');if(sp)sp.onclick=()=>speak(w[0]);
+  if(type===1||type===2)speak(w[0]);
+  let first=true,locked=false;
+  document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+   if(locked)return;const o=opts[b.dataset.k];
+   if(o[0]===w[0]){locked=true;b.classList.add('right');sOk();speak(w[0]);if(first)score++;later(()=>{if(++i<N)draw();else go(()=>result(u,'quiz',score,N,()=>GAMES.quiz(u)))},1100)}
+   else{first=false;b.classList.add('wrong');sNo()}
+  });
+ })();
+};
+
+/* ===== 4. 글자 맞추기 ===== */
+GAMES.spell=function(u){
+ const ws=shuffle(u.words).slice(0,6);let i=0,score=0;
+ (function draw(){
+  const w=ws[i],letters=[...w[0]].filter(c=>/[a-z]/i.test(c));
+  let slots=[...w[0]].map(c=>/[a-z]/i.test(c)?{c,v:null}:{gap:c});
+  const tiles=shuffle(letters).map((c,k)=>({c,k,used:false}));
+  let miss=0;
+  shell('글자 맞추기',`${prog(i,ws.length)}<div class="panel"><div class="big">${w[3]}</div><div class="ko">${w[1]}</div><button id="sp">🔊 듣기</button><div class="slots" id="sl"></div><div class="tiles" id="tl"></div></div>`,back(u));
+  speak(w[0]);$('#sp').onclick=()=>speak(w[0]);
+  const paint=()=>{
+   $('#sl').innerHTML=slots.map((s,k)=>s.gap!==undefined?`<div class="slot gap">${s.gap==='-'?'-':''}</div>`:`<div class="slot" data-k="${k}">${s.v?s.v.c:''}</div>`).join('');
+   $('#tl').innerHTML=tiles.map(t=>`<button class="tile${t.used?' used':''}" data-k="${t.k}">${t.c}</button>`).join('');
+   document.querySelectorAll('.slot[data-k]').forEach(el=>el.onclick=()=>{const s=slots[el.dataset.k];if(s.v){tiles[s.v.k].used=false;s.v=null;paint()}});
+   document.querySelectorAll('.tile').forEach(el=>el.onclick=()=>{
+    const t=tiles.find(x=>x.k==el.dataset.k);if(t.used)return;
+    const s=slots.find(x=>x.gap===undefined&&!x.v);if(!s)return;
+    s.v=t;t.used=true;paint();
+    if(!slots.some(x=>x.gap===undefined&&!x.v)){
+     const ok=slots.every(x=>x.gap!==undefined||x.v.c===x.c);
+     if(ok){sOk();speak(w[0]);if(!miss)score++;$('#sl').style.color='var(--ok)';later(()=>{if(++i<ws.length)draw();else go(()=>result(u,'spell',score,ws.length,()=>GAMES.spell(u)))},1200)}
+     else{sNo();miss++;later(()=>{slots.forEach(x=>{if(x.v)x.v=null});tiles.forEach(x=>x.used=false);paint()},500)}
+    }
+   });
+  };
+  paint();
+ })();
+};
+
+/* ===== 5. 문장 완성 ===== */
+GAMES.fill=function(u){
+ const F=shuffle(u.fills);let i=0,score=0;
+ (function draw(){
+  const f=F[i],[a,b]=f.t.split('___');
+  shell('문장 완성',`${prog(i,F.length)}<div class="panel">${f.h?`<div class="hint">💬 ${f.h}</div>`:''}<div class="sent">${a}<span class="blank" id="bl">&nbsp;</span>${b}</div></div><div class="opts">${shuffle(f.o).map(o=>`<button class="opt">${o}</button>`).join('')}</div>`,back(u));
+  let first=true,locked=false;
+  document.querySelectorAll('.opt').forEach(el=>el.onclick=()=>{
+   if(locked)return;
+   if(el.textContent===f.a){locked=true;el.classList.add('right');$('#bl').textContent=f.a;sOk();
+    speak(/[가-힣]/.test(f.t)?f.a:f.t.replace('___',f.a).replace(/["]/g,''));
+    if(first)score++;later(()=>{if(++i<F.length)draw();else go(()=>result(u,'fill',score,F.length,()=>GAMES.fill(u)))},1700)}
+   else{first=false;el.classList.add('wrong');sNo()}
+  });
+ })();
+};
+
+/* ===== 6. 상황극 ===== */
+GAMES.dialog=function(u){
+ const pickD=()=>{
+  shell('상황극',`<p style="text-align:center">연습할 상황을 골라요</p><div class="modes">${u.dlgs.map((d,k)=>`<button class="mbtn" data-k="${k}"><span class="i">🎭</span><span><b>${d.title}</b></span></button>`).join('')}</div>`,back(u));
+  document.querySelectorAll('.mbtn').forEach(b=>b.onclick=()=>go(()=>room(u.dlgs[b.dataset.k])));
+ };
+ const room=d=>{
+  let role=1;
+  const draw=()=>{
+   shell(d.title,`<div class="row" style="margin:0 0 8px">${d.roles.map((r,k)=>`<button class="${k===role?'':'ghost'}" data-r="${k}">나는 "${r}"</button>`).join('')}</div><p style="text-align:center;margin:4px">파란 말풍선이 내 차례예요. 눌러서 들어보고 따라 말해요.</p><div id="ls">${d.lines.map((l,k)=>`<div class="bub${l[0]===role?' me':''}" data-k="${k}"><div class="who">${d.roles[l[0]]}</div><div class="en">${l[1]}</div><div class="kk">${l[2]}</div></div>`).join('')}</div><div class="row"><button id="all">▶ 처음부터 듣기</button><button class="ghost" id="fin">연습 끝!</button></div>`,()=>pickD());
+   document.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{playTok++;role=+b.dataset.r;draw()});
+   document.querySelectorAll('.bub').forEach(b=>b.onclick=()=>speak(d.lines[b.dataset.k][1]));
+   $('#all').onclick=async()=>{const t=++playTok;const els=document.querySelectorAll('.bub');
+    for(let k=0;k<d.lines.length;k++){if(t!==playTok)return;els.forEach(e=>e.classList.remove('now'));els[k].classList.add('now');await speakP(d.lines[k][1]);await wait(350)}
+    els.forEach(e=>e.classList.remove('now'))};
+   $('#fin').onclick=()=>go(()=>result(u,'dialog',0,0,()=>GAMES.dialog(u)));
+  };
+  draw();
+ };
+ u.dlgs.length===1?room(u.dlgs[0]):pickD();
+};
+
+/* ===== 7. 소리 빙고 ===== */
+GAMES.bingo=function(u){
+ const B=shuffle(u.words).slice(0,8);const cells=[...B.slice(0,4),null,...B.slice(4)];
+ const order=shuffle(B);let c=0,got=new Set(),lines=0;
+ const L=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+ const on=new Set([4]);
+ shell('소리 빙고',`<p style="text-align:center;margin:0">들리는 단어의 칸을 눌러요. 한 줄이 모이면 BINGO!</p><div class="row"><button id="sp">🔊 다시 듣기</button></div><div id="bn"></div><div class="bingo" id="bg">${cells.map((w,k)=>w?`<button class="bc" data-k="${k}"><span class="e">${w[3]}</span><b>${w[0]}</b></button>`:`<button class="bc on" disabled><span class="e">⭐</span><b>FREE</b></button>`).join('')}</div>`,back(u));
+ const call=()=>{speak(order[c][0])};
+ $('#sp').onclick=call;later(call,300);
+ document.querySelectorAll('.bc[data-k]').forEach(b=>b.onclick=()=>{
+  if(b.classList.contains('on'))return;
+  const w=cells[b.dataset.k];
+  if(w[0]===order[c][0]){
+   b.classList.add('on');on.add(+b.dataset.k);sOk();
+   const n=L.filter(l=>l.every(x=>on.has(x))).length;
+   if(n>lines){lines=n;$('#bn').innerHTML=`<div class="banner">🎉 BINGO! ${n}줄 🎉</div>`;
+    L.filter(l=>l.every(x=>on.has(x))).forEach(l=>l.forEach(x=>document.querySelector(`.bc[data-k="${x}"]`)?.classList.add('line')))}
+   if(++c<order.length)later(call,1200);else later(()=>go(()=>result(u,'bingo',order.length,order.length,()=>GAMES.bingo(u))),1800);
+  }else{sNo();b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),350)}
+ });
+};
+
+home();
+try{speechSynthesis.getVoices()}catch(e){}
+</script>
